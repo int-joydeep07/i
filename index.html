@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Inta — Sign in</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-wrap">
+    <div class="auth-brand">
+      <div class="auth-logo">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C6.48 2 2 6.03 2 11c0 2.61 1.23 4.94 3.17 6.58L4 22l4.72-1.87C9.75 20.37 10.85 20.5 12 20.5c5.52 0 10-4.03 10-9S17.52 2 12 2Z" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1>Inta</h1>
+      <p class="auth-tagline">Simple. Secure. Straight to the point.</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab auth-tab--active" data-tab="login" type="button">Log in</button>
+        <button class="auth-tab" data-tab="signup" type="button">Create account</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form" novalidate>
+        <label class="field">
+          <span class="field-label">Your ID</span>
+          <input type="text" id="loginId" inputmode="numeric" maxlength="9" placeholder="e.g. 873633365" autocomplete="username" />
+        </label>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" />
+        </label>
+        <p class="field-error" id="loginError"></p>
+        <button type="submit" class="btn btn--primary btn--block" id="loginBtn">Log in</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="signupForm" class="auth-form auth-form--hidden" novalidate>
+        <label class="field">
+          <span class="field-label">Choose a username</span>
+          <input type="text" id="signupUsername" maxlength="24" placeholder="e.g. Rahul" autocomplete="nickname" />
+        </label>
+        <label class="field">
+          <span class="field-label">Choose a password</span>
+          <input type="password" id="signupPassword" placeholder="At least 4 characters" autocomplete="new-password" />
+        </label>
+        <p class="field-hint">You'll get a permanent numeric ID after signing up — that's how friends find you.</p>
+        <p class="field-error" id="signupError"></p>
+        <button type="submit" class="btn btn--primary btn--block" id="signupBtn">Create account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ID reveal modal shown once, right after signup -->
+  <div class="modal-overlay" id="idRevealOverlay">
+    <div class="modal-box id-reveal">
+      <div class="id-reveal-icon">✓</div>
+      <h2>Account created</h2>
+      <p>This is your permanent ID. Share it with friends so they can add you.</p>
+      <div class="id-reveal-code" id="idRevealCode">000000000</div>
+      <button class="btn btn--primary btn--block" id="idRevealContinue">Continue to Inta</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    (function () {
+      // If already logged in, skip straight to the app
+      if (localStorage.getItem("userId")) {
+        window.location.href = "home.html";
+        return;
+      }
+
+      const tabs = document.querySelectorAll(".auth-tab");
+      const loginForm = document.getElementById("loginForm");
+      const signupForm = document.getElementById("signupForm");
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          tabs.forEach(t => t.classList.remove("auth-tab--active"));
+          tab.classList.add("auth-tab--active");
+          const isLogin = tab.dataset.tab === "login";
+          loginForm.classList.toggle("auth-form--hidden", !isLogin);
+          signupForm.classList.toggle("auth-form--hidden", isLogin);
+        });
+      });
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const idField = document.getElementById("loginId");
+        const passField = document.getElementById("loginPassword");
+        const errorEl = document.getElementById("loginError");
+        const btn = document.getElementById("loginBtn");
+        errorEl.textContent = "";
+
+        UI.setLoading(btn, true, "Logging in…");
+        try {
+          const user = await Auth.login({ id: idField.value, password: passField.value });
+          Auth.persistSession(user);
+          window.location.href = "home.html";
+        } catch (err) {
+          errorEl.textContent = err.message || "Something went wrong.";
+          UI.setLoading(btn, false);
+        }
+      });
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userField = document.getElementById("signupUsername");
+        const passField = document.getElementById("signupPassword");
+        const errorEl = document.getElementById("signupError");
+        const btn = document.getElementById("signupBtn");
+        errorEl.textContent = "";
+
+        UI.setLoading(btn, true, "Creating account…");
+        try {
+          const user = await Auth.signup({ username: userField.value, password: passField.value });
+          Auth.persistSession(user);
+
+          // Show the ID reveal modal before continuing
+          document.getElementById("idRevealCode").textContent = user.id;
+          document.getElementById("idRevealOverlay").classList.add("modal-overlay--show");
+        } catch (err) {
+          errorEl.textContent = err.message || "Something went wrong.";
+          UI.setLoading(btn, false);
+        }
+      });
+
+      document.getElementById("idRevealContinue").addEventListener("click", () => {
+        window.location.href = "home.html";
+      });
+
+      // Numeric-only ID field
+      document.getElementById("loginId").addEventListener("input", (e) => {
+        e.target.value = e.target.value.replace(/\D/g, "").slice(0, 9);
+      });
+    })();
+  </script>
+</body>
+</html>

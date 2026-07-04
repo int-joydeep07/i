@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Inta</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/home.css" />
+<link rel="stylesheet" href="css/chat.css" />
+</head>
+<body class="app-body" data-theme="light">
+
+<div id="app" class="app">
+
+  <!-- ═══════════════ CHAT LIST SCREEN ═══════════════ -->
+  <section id="chatListScreen" class="screen chat-list-screen">
+
+    <header class="topbar">
+      <h1 class="topbar-title">Inta</h1>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="searchBtn" title="Search" aria-label="Search friends">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5L20.49 19l-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        </button>
+        <button class="icon-btn" id="notifBtn" title="Notifications" aria-label="Toggle notifications">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 22a2.2 2.2 0 0 0 2.2-2.2h-4.4A2.2 2.2 0 0 0 12 22zm7.3-6.4V11c0-3.5-1.9-6.5-5.3-7.3V3a2 2 0 1 0-4 0v.7C6.6 4.5 4.7 7.4 4.7 11v4.6L3 17.3v1h18v-1z"/></svg>
+          <span class="notif-dot" id="notifDot"></span>
+        </button>
+        <div class="menu-wrap">
+          <button class="icon-btn" id="menuBtn" title="Menu" aria-label="Open menu">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+          </button>
+          <div class="dropdown" id="menuDropdown">
+            <button class="dropdown-item" id="menuChangeName">Change Name</button>
+            <button class="dropdown-item" id="menuProfile">Profile</button>
+            <button class="dropdown-item" id="menuTheme">Toggle Dark Mode</button>
+            <button class="dropdown-item dropdown-item--danger" id="menuLogout">Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="my-id-strip" id="myIdStrip">
+      Your ID: <strong id="myIdText">—</strong>
+      <button class="link-btn" id="copyIdBtn">Copy</button>
+    </div>
+
+    <div id="chatList" class="chat-list"></div>
+
+    <div id="chatListEmpty" class="empty-state empty-state--hidden">
+      <div class="empty-illustration">💬</div>
+      <h3>No chats yet</h3>
+      <p>Tap the button below to add a friend by their ID and start chatting.</p>
+    </div>
+
+    <button class="fab" id="addFriendFab" title="Add friend" aria-label="Add friend">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.4 0-8 2.2-8 5v1h11.3a5.5 5.5 0 0 1-.3-1.8c0-1.6.6-3 1.7-4.1A13 13 0 0 0 12 14zm7.5 0v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </button>
+  </section>
+
+  <!-- ═══════════════ SINGLE CHAT SCREEN (slides in) ═══════════════ -->
+  <section id="chatScreen" class="screen chat-screen">
+    <header class="chat-header">
+      <button class="icon-btn" id="chatBackBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+      </button>
+      <div class="chat-avatar" id="chatAvatar"></div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="chatHeaderName">—</div>
+        <div class="chat-header-status" id="chatHeaderStatus">—</div>
+      </div>
+      <button class="icon-btn" id="chatMenuBtn" aria-label="Chat options">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+      </button>
+      <div class="dropdown dropdown--right" id="chatMenuDropdown">
+        <button class="dropdown-item dropdown-item--danger" id="chatUnfriendBtn">Remove Friend</button>
+      </div>
+    </header>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <span></span><span></span><span></span>
+    </div>
+
+    <form class="chat-composer" id="chatComposer">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Type a message" autocomplete="off" maxlength="2000" />
+      <button type="submit" class="send-btn" id="sendBtn" aria-label="Send">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <!-- ═══════════════ ADD FRIEND PANEL ═══════════════ -->
+  <aside class="panel panel--right" id="addFriendPanel">
+    <div class="panel-header">
+      <h2>Add Friend</h2>
+      <button class="icon-btn" id="closeAddFriendBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-body">
+      <label class="field">
+        <span class="field-label">Friend's ID</span>
+        <input type="text" id="addFriendIdInput" inputmode="numeric" maxlength="9" placeholder="e.g. 873633365" />
+      </label>
+      <button class="btn btn--primary btn--block" id="addFriendLookupBtn">Search</button>
+
+      <div class="found-user found-user--hidden" id="foundUserCard">
+        <div class="found-user-avatar" id="foundUserAvatar"></div>
+        <div class="found-user-info">
+          <div class="found-user-name" id="foundUserName">—</div>
+          <div class="found-user-id" id="foundUserId">—</div>
+        </div>
+        <button class="btn btn--primary" id="foundUserAddBtn">Add Friend</button>
+      </div>
+      <p class="field-error" id="addFriendError"></p>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ SEARCH PANEL ═══════════════ -->
+  <aside class="panel panel--right" id="searchPanel">
+    <div class="panel-header">
+      <h2>Search</h2>
+      <button class="icon-btn" id="closeSearchBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-body">
+      <label class="field">
+        <span class="field-label">Search by name or ID</span>
+        <input type="text" id="searchInput" placeholder="Search your friends" />
+      </label>
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ PROFILE PANEL ═══════════════ -->
+  <aside class="panel panel--right" id="profilePanel">
+    <div class="panel-header">
+      <h2>Profile</h2>
+      <button class="icon-btn" id="closeProfileBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="panel-body panel-body--center">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <label class="avatar-edit-btn" for="profilePhotoInput" title="Change photo">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 3l-1.8 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+        </label>
+        <input type="file" id="profilePhotoInput" accept="image/*" hidden />
+      </div>
+      <h3 id="profileUsername">—</h3>
+      <p class="profile-id" id="profileIdText">—</p>
+      <button class="btn btn--secondary btn--block" id="profileChangeNameBtn">Change Name</button>
+      <button class="btn btn--secondary btn--block" id="profileChangePasswordBtn">Change Password</button>
+    </div>
+  </aside>
+
+  <div id="toastHost" class="toast-host"></div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+
+<script src="js/firebase.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/friends.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>
